@@ -27,8 +27,10 @@ class StatsD {
 		}
 	}
 	public function close() {
-		fclose($this->connection);
-		echo "\n bytes sent ".$this->bytes_sent."\n";
+		if($this->connection) {
+			fclose($this->connection);
+			echo "\n bytes sent ".$this->bytes_sent."\n";
+		}
 	}
 	
 	private function sendData($data) {

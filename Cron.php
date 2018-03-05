@@ -3,8 +3,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Cron {
 	private $statsd = null;
-	public function __construct($statsd) {
+	private $company_tag = null;
+	public function __construct($statsd, $company_tag) {
 		$this->statsd = $statsd;
+		$this->company_tag = $company_tag;
 	}
 	
 	public function calls($rows) {
@@ -194,22 +196,22 @@ class Cron {
 								
 								if (is_array($item_f)) {
 									foreach ($item_f as $key5 => $item5) {
-										$d = $this->statsd->sendToGraphite("calls." . $key . "." . $key2 . "." . $key3 . "." . $key4 . "." . $key5, $item5);
+										$d = $this->statsd->sendToGraphite("calls." . $this->company_tag . ".". $key."." . $key2 . "." . $key3 . "." . $key4 . "." . $key5, $item5);
 										echo $d;
 									}
 								} else {
-									$d = $this->statsd->sendToGraphite("calls." . $key . "." . $key2 . "." . $key3 . "." . $key4, $item_f);
+									$d = $this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2 . "." . $key3 . "." . $key4, $item_f);
 									echo $d;
 								}
 							}
 							
 						} else {
-							$d = $this->statsd->sendToGraphite("calls." . $key . "." . $key2 . "." . $key3, $item);
+							$d = $this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2 . "." . $key3, $item);
 							echo $d;
 						}
 					}
 				} else {
-					$d = $this->statsd->sendToGraphite("calls." . $key . "." . $key2, $value);
+					$d = $this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2, $value);
 					echo $d;
 				}
 			}
