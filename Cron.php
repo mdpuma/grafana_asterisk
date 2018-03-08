@@ -4,12 +4,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Cron {
 	private $statsd = null;
 	private $company_tag = null;
-	public function __construct($statsd, $company_tag) {
+	private $mysql = null;
+	private $db_table = null;
+	
+	public function __construct($statsd, $mysql, $company_tag='null', $db_table='asteriskcdrdb') {
 		$this->statsd = $statsd;
 		$this->company_tag = $company_tag;
+		$this->mysql = $mysql;
+		$this->db_table = $db_table;
 	}
 	
-	public function calls($rows) {
+	public function calls($from, $to) {
+		$this->print_stdout("Calculate calls for interval ".date("Y-m-d H:i", $from)." - ".date("Y-m-d H:i", $to));
+		$query = 'SELECT ADDTIME(calldate,duration) as calldate,duration,billsec,disposition,channel,dstchannel FROM '.$this->db_table.' WHERE ADDTIME(calldate,duration) >= :from AND ADDTIME(calldate,duration) < :to ORDER BY calldate ASC';
+		$sth = $this->mysql->prepare($query);
+		$sth->bindvalue(':from', date("Y-m-d H:i", $from), PDO::PARAM_STR);
+		$sth->bindvalue(':to', date("Y-m-d H:i", $to), PDO::PARAM_STR);
+		$sth->execute();
+		
+		$rows = $sth->fetchAll(PDO::FETCH_ASSOC);
+		
+		if(!empty($rows)) {
+			$this->print_csv($rows);
+		}
+		
 		/* 
 		 * Am facut prin ciclu pentru ca la un numar mic de rinduri 
 		 * e mai rapit sa le numeri in php decit sa faci request la db, 
@@ -196,23 +214,19 @@ class Cron {
 								
 								if (is_array($item_f)) {
 									foreach ($item_f as $key5 => $item5) {
-										$d = $this->statsd->sendToGraphite("calls." . $this->company_tag . ".". $key."." . $key2 . "." . $key3 . "." . $key4 . "." . $key5, $item5);
-										echo $d;
+										$this->statsd->sendToGraphite("calls." . $this->company_tag . ".". $key."." . $key2 . "." . $key3 . "." . $key4 . "." . $key5, $item5);
 									}
 								} else {
-									$d = $this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2 . "." . $key3 . "." . $key4, $item_f);
-									echo $d;
+									$this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2 . "." . $key3 . "." . $key4, $item_f);
 								}
 							}
 							
 						} else {
-							$d = $this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2 . "." . $key3, $item);
-							echo $d;
+							$this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2 . "." . $key3, $item);
 						}
 					}
 				} else {
-					$d = $this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2, $value);
-					echo $d;
+					$this->statsd->sendToGraphite("calls." . $this->company_tag . "." . $key . "." . $key2, $value);
 				}
 			}
 		}
@@ -235,5 +249,25 @@ class Cron {
 // 			));
 // 		}
 // 		set_log(isset($totals['count']['by_company']['total']['total']) ? $totals['count']['by_company']['total']['total'] : 0, $service_key);
+	}
+	public function print_stderr($msg) {
+		$date = date("d-m-Y h:i");
+		file_put_contents('php://stderr', '['.$date.'] '.$msg."\n");
+	}
+	public function print_stdout($msg) {
+		$date = date("d-m-Y h:i");
+		echo('['.$date.'] '.$msg."\n");
+	}
+	public function print_csv($array) {
+		foreach($array[0] as $i => $j) {
+			printf("%s, ", $i);
+		}
+		print "\n";
+		foreach($array as $i) {
+			foreach($i as $j) {
+				printf("%s, ", $j);
+			}
+			print "\n";
+		}
 	}
 }

@@ -6,11 +6,13 @@ class StatsD {
 	private $connection=null;
 	private $unixtimestamp=null;
 	private $bytes_sent=0;
+	private $dry_run=null;
 	
-	public function __construct($host, $port, $unixtimestamp=0) {
+	public function __construct($host, $port, $unixtimestamp=0, $dry_run=false) {
 		$this->host = $host;
 		$this->port = $port;
 		$this->unixtimestamp = $unixtimestamp;
+		$this->dry_run = $dry_run;
 	}
 	
 	public function sendToGraphite($key,$value) {
@@ -34,6 +36,10 @@ class StatsD {
 	}
 	
 	private function sendData($data) {
+		printf("%s [%s]\n", trim($data), date("d-m-Y H:i", $this->unixtimestamp));
+		if($this->dry_run==true) {
+			return $data;
+		}
 		if($this->connection==null) {
 			$this->connect();
 		}
