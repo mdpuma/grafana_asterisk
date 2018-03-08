@@ -16,7 +16,8 @@ class Cron {
 	
 	public function calls($from, $to) {
 		$this->print_stdout("Calculate calls for interval ".date("Y-m-d H:i", $from)." - ".date("Y-m-d H:i", $to));
-		$query = 'SELECT ADDTIME(calldate,duration) as calldate,duration,billsec,disposition,channel,dstchannel FROM '.$this->db_table.' WHERE ADDTIME(calldate,duration) >= :from AND ADDTIME(calldate,duration) < :to ORDER BY calldate ASC';
+		// date_add('2018-03-01 18:11:37', INTERVAL 300 SECOND)
+		$query = 'SELECT DATE_ADD(calldate, INTERVAL billsec SECOND) as calldate2,calldate,duration,billsec,disposition,channel,dstchannel FROM '.$this->db_table.' WHERE DATE_ADD(calldate, INTERVAL billsec SECOND) >= :from AND DATE_ADD(calldate, INTERVAL billsec SECOND) < :to ORDER BY calldate ASC';
 		$sth = $this->mysql->prepare($query);
 		$sth->bindvalue(':from', date("Y-m-d H:i", $from), PDO::PARAM_STR);
 		$sth->bindvalue(':to', date("Y-m-d H:i", $to), PDO::PARAM_STR);
