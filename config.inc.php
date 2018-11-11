@@ -5,14 +5,16 @@ error_reporting(E_ALL);
 date_default_timezone_set('Europe/Chisinau');
 
 /*
-Add mysql user
-CREATE USER 'calls'@'localhost' IDENTIFIED BY PASSWORD '*7A7E9D37C849086D1C98F1E36C0AD877D326EE47';
+  Add mysql user
+
+CREATE USER 'calls'@'localhost';
+SET PASSWORD FOR calls@localhost = PASSWORD('calls');
 GRANT SELECT ON `asteriskcdrdb`.* TO 'calls'@'localhost';
 */
 
 $DB['host'] = 'localhost';
 $DB['user'] = 'calls';
-$DB['pass'] = '';
+$DB['pass'] = 'calls';
 $DB['name'] = 'asteriskcdrdb';
 $DB['table'] = 'cdr';
 

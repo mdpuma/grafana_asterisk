@@ -1,9 +1,14 @@
 <?php
 
 define('BASEPATH', dirname(__FILE__));
-include BASEPATH.'/config.php';
-include BASEPATH.'/Cron.php';
-include BASEPATH.'/StatsD.php';
+
+if(!is_file(BASEPATH.'/config.php')) {
+	die("Missing ".BASEPATH."/config.php\n");
+}
+
+require_once BASEPATH.'/config.php';
+require_once BASEPATH.'/Cron.php';
+require_once BASEPATH.'/StatsD.php';
 
 $mysql = new PDO("mysql:host=".$DB['host'].";port=3306;dbname=".$DB['name'].";charset=UTF8;", $DB['user'], $DB['pass'], array(PDO::ATTR_PERSISTENT=>false, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
 $mysql->query("SET NAMES utf8;");
