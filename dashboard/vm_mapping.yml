@@ -1,0 +1,58 @@
+- action: graphite
+  match: calls.*.duration.by_company.*
+  labels:
+    __name__: "calls"
+    company: "$1"
+    type: "duration"
+    entity: "by_company"
+    direction: "$2"
+
+- action: graphite
+  match: calls.*.count.by_company.*.*
+  labels:
+    __name__: "calls"
+    company: "$1"
+    type: "count"
+    entity: "by_company"
+    direction: "$2"
+    status: "$3"
+
+- action: graphite
+  match: calls.*.duration.by_operator.*.*
+  labels:
+    __name__: "calls"
+    company: "$1"
+    type: "duration"
+    entity: "by_operator"
+    extension: "$2"
+    direction: "$3"
+
+- action: graphite
+  match: calls.*.count.by_operator.*.*.*
+  labels:
+    __name__: "calls"
+    company: "$1"
+    type: "count"
+    entity: "by_operator"
+    extension: "$2"
+    direction: "$3"
+    status: "$4"
+
+- action: graphite
+  match: calls.*.average_duration.*.*
+  labels:
+    __name__: "calls"
+    company: "$1"
+    type: "average_duration"
+    extension: "$2"
+    direction: "$3"
+
+- action: graphite
+  match: calls.*.average_waiting.*.*
+  labels:
+    __name__: "calls"
+    company: "$1"
+    type: "average_waiting"
+    extension: "$2"
+    direction: "$3"
+
